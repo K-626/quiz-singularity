@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>クイズ問題一括登録（管理者用）</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        h1 { text-align: center; font-size: 24px; color: #2c3e50; }
+        .file-input-area {
+            border: 2px dashed #3498db;
+            padding: 30px;
+            text-align: center;
+            background: #ecf0f1;
+            border-radius: 8px;
+            margin: 20px 0;
+            cursor: pointer;
+        }
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            font-size: 18px;
+            color: white;
+            background-color: #2ecc71;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn:disabled { background-color: #bdc3c7; cursor: not-allowed; }
+        .status { margin-top: 20px; font-weight: bold; text-align: center; }
+        .format-info { background: #fffde7; padding: 15px; border-radius: 6px; font-size: 14px; border: 1px solid #fff59d; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h1>クイズ問題 一括CSV登録</h1>
+        
+        <div class="format-info">
+            <strong>【CSVファイルの形式】</strong><br>
+            Excel等で作成し、必ず<strong>UTF-8形式のCSV</strong>で保存してください。<br>
+            1行目はヘッダー（問題文,答え）として読み飛ばします。<br>
+            <br>
+            <code>
+            問題文,答え<br>
+            日本で一番高い山は？,エベレスト<br>
+            日本の首都はどこ？,東京
+            </code>
+        </div>
+
+        <div class="file-input-area" onclick="document.getElementById('csv-file').click()">
+            <p>ここをクリックしてCSVファイルを選択</p>
+            <input type="file" id="csv-file" accept=".csv" style="display:none;" onchange="updateFileName()">
+            <div id="file-name" style="color: #3498db; font-weight: bold;"></div>
+        </div>
+
+        <button id="upload-btn" class="btn" onclick="uploadCSV()" disabled>登録を実行する</button>
+        
+        <div id="status-msg" class="status"></div>
+    </div>
+
+    <script>
+        // --- Supabaseの接続設定 ---
+        const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+        const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // ファイルが選択されたらボタンを有効化
+        function updateFileName() {
+            const fileInput = document.getElementById('csv-file');
+            const fileNameDiv = document.getElementById('file-name');
+            const uploadBtn = document.getElementById('upload-btn');
+            
+            if (fileInput.files.length > 0) {
+                fileNameDiv.innerText = `選択中: ${fileInput.files[0].name}`;
+                uploadBtn.disabled = false;
+            } else {
+                fileNameDiv.innerText = "";
+                uploadBtn.disabled = true;
+            }
+        }
+
+        // CSVの解析とアップロード処理
+        function uploadCSV() {
+            const fileInput = document.getElementById('csv-file');
+            const statusMsg = document.getElementById('status-msg');
+            const uploadBtn = document.getElementById('upload-btn');
+
+            if (fileInput.files.length === 0) return;
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            statusMsg.innerText = "ファイルを読み込み中...";
+            statusMsg.style.color = "#333";
+            uploadBtn.disabled = true;
+
+            reader.onload = async function(e) {
+                const text = e.target.result;
+                // 行ごとに分割（改行コード \n または \r\n に対応）
+                const lines = text.split(/\r?\n/);
+                
+                const quizData = [];
+
+                // 1行目はヘッダー(問題文,答え)を想定して「i = 1」からスタート（2行目以降を処理）
+                for (let i = 1; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (!line) continue; // 空行はスキップ
+
+                    // カンマで分割。簡易的にダブルクォーテーションの考慮なし
+                    // ※問題文の中に「,」が入る場合は注意
+                    const columns = line.split(',');
+                    
+                    if (columns.length >= 2) {
+                        const question = columns[0].trim();
+                        const answer = columns[1].trim();
+                        
+                        if (question && answer) {
+                            quizData.push({
+                                question: question,
+                                answer: answer
+                            });
+                        }
+                    }
+                }
+
+                if (quizData.length === 0) {
+                    statusMsg.innerText = "有効なデータが見つかりませんでした。形式を確認してください。";
+                    statusMsg.style.color = "#e74c3c";
+                    uploadBtn.disabled = false;
+                    return;
+                }
+
+                statusMsg.innerText = `${quizData.length}件のデータをデータベースに送信中...`;
+
+                // Supabaseへ一括インサート
+                const { error } = await supabase
+                    .from('quizzes')
+                    .insert(quizData);
+
+                if (error) {
+                    console.error(error);
+                    statusMsg.innerText = "エラーが発生しました。データを登録できませんでした。";
+                    statusMsg.style.color = "#e74c3c";
+                } else {
+                    statusMsg.innerText = `🎉 成功！ ${quizData.length}件のクイズを一括登録しました！`;
+                    statusMsg.style.color = "#2ecc71";
+                    fileInput.value = ""; // リセット
+                    document.getElementById('file-name').innerText = "";
+                }
+            };
+
+            // テキストとしてファイルを読み込む（文字コードはUTF-8）
+            reader.readAsText(file, 'UTF-8');
+        }
+    </script>
+</body>
+</html>
