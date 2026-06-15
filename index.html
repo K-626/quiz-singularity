@@ -165,7 +165,8 @@
         }
 
         // クイズ開始
-        async var startQuiz = async (mode) => {
+        // クイズ開始
+        const startQuiz = async (mode) => {
             currentMode = mode;
             document.getElementById('mode-screen').style.display = 'none';
             document.getElementById('quiz-screen').style.display = 'block';
