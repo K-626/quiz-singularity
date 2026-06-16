@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,13 +15,20 @@
             margin: 40px auto;
             padding: 20px;
         }
+
         .card {
             background: white;
             padding: 30px;
             border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
-        h1 { text-align: center; font-size: 24px; color: #2c3e50; }
+
+        h1 {
+            text-align: center;
+            font-size: 24px;
+            color: #2c3e50;
+        }
+
         .file-input-area {
             border: 2px dashed #3498db;
             padding: 30px;
@@ -30,6 +38,7 @@
             margin: 20px 0;
             cursor: pointer;
         }
+
         .btn {
             display: block;
             width: 100%;
@@ -42,16 +51,33 @@
             cursor: pointer;
             font-weight: bold;
         }
-        .btn:disabled { background-color: #bdc3c7; cursor: not-allowed; }
-        .status { margin-top: 20px; font-weight: bold; text-align: center; }
-        .format-info { background: #fffde7; padding: 15px; border-radius: 6px; font-size: 14px; border: 1px solid #fff59d; }
+
+        .btn:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        .status {
+            margin-top: 20px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .format-info {
+            background: #fffde7;
+            padding: 15px;
+            border-radius: 6px;
+            font-size: 14px;
+            border: 1px solid #fff59d;
+        }
     </style>
 </head>
+
 <body>
 
     <div class="card">
         <h1>クイズ問題 一括CSV登録</h1>
-        
+
         <div class="format-info">
             <strong>【CSVファイルの形式】</strong><br>
             Excel等で作成し、必ず<strong>UTF-8形式のCSV</strong>で保存してください。<br>
@@ -71,22 +97,22 @@
         </div>
 
         <button id="upload-btn" class="btn" onclick="uploadCSV()" disabled>登録を実行する</button>
-        
+
         <div id="status-msg" class="status"></div>
     </div>
 
     <script>
         // --- Supabaseの接続設定 ---
-        const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
-        const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const SUPABASE_URL = 'https://ogejvelyldxffbljzgav.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9nZWp2ZWx5bGR4ZmZibGp6Z2F2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0MzcwOTEsImV4cCI6MjA5NzAxMzA5MX0.mo0l3aEgR3gkc-6_2p3_O1WHISxN2tB9ooUFfyDkQXY';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         // ファイルが選択されたらボタンを有効化
         function updateFileName() {
             const fileInput = document.getElementById('csv-file');
             const fileNameDiv = document.getElementById('file-name');
             const uploadBtn = document.getElementById('upload-btn');
-            
+
             if (fileInput.files.length > 0) {
                 fileNameDiv.innerText = `選択中: ${fileInput.files[0].name}`;
                 uploadBtn.disabled = false;
@@ -111,11 +137,11 @@
             statusMsg.style.color = "#333";
             uploadBtn.disabled = true;
 
-            reader.onload = async function(e) {
+            reader.onload = async function (e) {
                 const text = e.target.result;
                 // 行ごとに分割（改行コード \n または \r\n に対応）
                 const lines = text.split(/\r?\n/);
-                
+
                 const quizData = [];
 
                 // 1行目はヘッダー(問題文,答え)を想定して「i = 1」からスタート（2行目以降を処理）
@@ -126,11 +152,11 @@
                     // カンマで分割。簡易的にダブルクォーテーションの考慮なし
                     // ※問題文の中に「,」が入る場合は注意
                     const columns = line.split(',');
-                    
+
                     if (columns.length >= 2) {
                         const question = columns[0].trim();
                         const answer = columns[1].trim();
-                        
+
                         if (question && answer) {
                             quizData.push({
                                 question: question,
@@ -171,4 +197,5 @@
         }
     </script>
 </body>
+
 </html>
