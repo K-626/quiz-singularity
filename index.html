@@ -32,7 +32,7 @@
             justify-content: center;
             align-items: center;
         }
-        .mode-selection button {
+        .start-btn {
             font-size: 18px;
             padding: 12px 24px;
             margin: 10px;
@@ -43,9 +43,7 @@
             color: white;
             transition: 0.2s;
         }
-        .mode-selection button:hover { background-color: #2980b9; }
-        #q-mode-btn { background-color: #e67e22; }
-        #q-mode-btn:hover { background-color: #d35400; }
+        .start-btn:hover { background-color: #2980b9; }
 
         .quiz-area { display: none; width: 100%; }
         .question-text {
@@ -68,12 +66,18 @@
             border-radius: 50px;
             cursor: pointer;
             box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            margin: 0 auto 12px auto;
+            display: block;
         }
         .action-btn:disabled { background-color: #bdc3c7; cursor: not-allowed; }
         
-        .result-area { display: none; margin-top: 20px; }
+        .result-area { display: none; margin-top: 20px; text-align: center; width: 100%; }
         .answer-text { font-size: 24px; color: #2c3e50; font-weight: bold; margin-bottom: 20px; }
-        
+        .judge-btns {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
         .judge-btns button {
             font-size: 20px;
             padding: 10px 30px;
@@ -104,30 +108,24 @@
     <h1>早押しタイピングクイズ</h1>
     
     <div class="card">
-        <div id="mode-screen" class="mode-selection">
-            <p>どちらのモードで遊びますか？</p>
-            <button id="normal-mode-btn" onclick="startQuiz('normal')">通常モード (データ提供)</button>
-            <button id="q-mode-btn" onclick="startQuiz('q')">Qモード (最速NPCと対戦)</button>
+        <div id="start-screen" class="mode-selection">
+            <button id="start-btn" class="start-btn" onclick="startQuiz()">ボタンを押す</button>
         </div>
 
         <div id="quiz-screen" class="quiz-area">
-            <div id="mode-badge" class="badge"></div>
             <div id="question-box" class="question-text"></div>
             <button id="push-btn" class="action-btn" onclick="pressButton()">押す！</button>
 
             <div id="result-box" class="result-area">
                 <div id="status-label" style="font-size: 18px; margin-bottom: 10px; font-weight: bold;"></div>
-                <div style="font-size: 14px; color: #7f8c8d;">正解は：</div>
+                <div style="font-size: 14px; color: #7f8c8d;">答え</div>
                 <div id="answer-box" class="answer-text"></div>
-                
                 <div id="judge-section">
-                    <p>あなたのボタンを押したタイミングは正解（〇）でしたか？</p>
                     <div class="judge-btns">
-                        <button id="btn-circle" onclick="submitResult(true)">〇 (正解)</button>
-                        <button id="btn-cross" onclick="submitResult(false)">× (不正解)</button>
+                        <button id="btn-circle" onclick="submitResult(true)">〇</button>
+                        <button id="btn-cross" onclick="submitResult(false)">×</button>
                     </div>
                 </div>
-                <button id="next-btn" style="display:none; margin-top:15px; padding:10px 20px;" onclick="initApp()">次の問題 / モード選択へ</button>
             </div>
             <div id="info-msg" class="status-msg"></div>
         </div>
@@ -138,10 +136,10 @@
         // ※ご自身のSupabaseのURLとAnon Keyに書き換えてください
         const SUPABASE_URL = 'https://ogejvelyldxffbljzgav.supabase.co/rest/v1/';
         const SUPABASE_ANON_KEY = 'sb_publishable_iZrJGTwgJ-dju3OikWl0mQ_nXV9o915';
-        const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         // --- 状態管理用変数 ---
-        let currentMode = 'normal'; // 'normal' or 'q'
+        let currentMode = 'battle';
         let currentQuiz = null;
         let fullQuestion = "";
         let displayedQuestion = "";
@@ -154,76 +152,76 @@
         let winner = "";             // "player" or "npc"
 
         // タイピングの速度（ミリ秒単位 / 1文字ごと）
-        const TYPING_SPEED = 150; 
+        const TYPING_SPEED = 150;
+        const FALLBACK_QUIZZES = [
+            { id: 'fallback-1', question: 'JavaScriptはブラウザで動く言語です', answer: 'JavaScript' },
+            { id: 'fallback-2', question: 'HTMLは文書の骨組みを作る言語です', answer: 'HTML' },
+            { id: 'fallback-3', question: 'CSSは見た目を整える言語です', answer: 'CSS' }
+        ];
 
         // アプリ初期化
         function initApp() {
-            document.getElementById('mode-screen').style.display = 'block';
+            document.getElementById('start-screen').style.display = 'block';
             document.getElementById('quiz-screen').style.display = 'none';
             document.getElementById('result-box').style.display = 'none';
             document.getElementById('push-btn').style.display = 'block';
             document.getElementById('push-btn').disabled = false;
-            document.getElementById('judge-section').style.display = 'block';
-            document.getElementById('next-btn').style.display = 'none';
+            document.getElementById('judge-section').style.display = 'none';
             document.getElementById('info-msg').innerText = "";
             isPressed = false;
             winner = "";
         }
 
         // クイズ開始
-        const startQuiz = async (mode) => {
-            currentMode = mode;
-            document.getElementById('mode-screen').style.display = 'none';
+        async function startQuiz() {
+            currentMode = 'battle';
+            document.getElementById('start-screen').style.display = 'none';
             document.getElementById('quiz-screen').style.display = 'block';
-            
-            const badge = document.getElementById('mode-badge');
-            if(mode === 'normal') {
-                badge.innerText = "通常モード (データ収集中)";
-                badge.className = "badge normal-badge";
-            } else {
-                badge.innerText = "Qモード (過去の最速NPCと対戦)";
-                badge.className = "badge q-badge";
-            }
 
             document.getElementById('question-box').innerText = "読み込み中...";
 
-            // 1. Supabaseからランダムに1問取得
-            const { data: quizzes, error } = await supabase.from('quizzes').select('*');
-            if (error || quizzes.length === 0) {
-                document.getElementById('question-box').innerText = "問題の取得に失敗しました。";
-                return;
+            // 1. Supabaseからランダムに1問取得（失敗時はローカルの代替問題を使う）
+            let quizzes = [];
+            let error = null;
+            try {
+                const result = await supabaseClient.from('quizzes').select('*');
+                quizzes = result.data || [];
+                error = result.error;
+            } catch (e) {
+                error = e;
             }
-            currentQuiz = quizzes[Math.floor(Math.random() * quizzes.length)];
+
+            if (error || quizzes.length === 0) {
+                currentQuiz = FALLBACK_QUIZZES[Math.floor(Math.random() * FALLBACK_QUIZZES.length)];
+                document.getElementById('info-msg').innerText = 'Supabaseの取得に失敗したため、サンプル問題を使用します。';
+            } else {
+                currentQuiz = quizzes[Math.floor(Math.random() * quizzes.length)];
+            }
             fullQuestion = currentQuiz.question;
             
-            // 2. Qモードの場合、NPCが押すタイミングを計算
-            if (currentMode === 'q') {
-                document.getElementById('info-msg').innerText = "NPC思考中...";
-                // 過去の「5文字以上」で「〇（正解）」だった最速（最小文字数）のログを1件取得
-                const { data: logs, error: logErr } = await supabase
-                    .from('play_logs')
-                    .select('pressed_chars')
-                    .eq('quiz_id', currentQuiz.id)
-                    .eq('is_correct', true)
-                    .gte('pressed_chars', 5)
-                    .order('pressed_chars', { ascending: true })
-                    .limit(1);
+            // 2. NPCの押しタイミングを計算（対戦しながらデータ収集するため常時使用）
+            document.getElementById('info-msg').innerText = 'NPC対戦中...';
+            const { data: logs } = await supabaseClient
+                .from('play_logs')
+                .select('pressed_chars')
+                .eq('quiz_id', currentQuiz.id)
+                .eq('is_correct', true)
+                .gte('pressed_chars', 5)
+                .order('pressed_chars', { ascending: true })
+                .limit(1);
 
-                if (logs && logs.length > 0) {
-                    // 過去データが存在する場合、その最速文字数で押させる
-                    npcPressCharIndex = logs[0].pressed_chars;
-                } else {
-                    // 過去データがない場合：問題文の長さ × (0.2〜0.8の乱数) ※四捨五入
-                    const randomFactor = Math.random() * (0.8 - 0.2) + 0.2;
-                    npcPressCharIndex = Math.round(fullQuestion.length * randomFactor);
-                }
+            if (logs && logs.length > 0) {
+                npcPressCharIndex = logs[0].pressed_chars;
+            } else {
+                const randomFactor = Math.random() * (0.8 - 0.2) + 0.2;
+                npcPressCharIndex = Math.round(fullQuestion.length * randomFactor);
             }
 
             // 3. タイピングスタート
             charIndex = 0;
             displayedQuestion = "";
             document.getElementById('question-box').innerText = "";
-            document.getElementById('info-msg').innerText = currentMode === 'q' ? "NPC対戦中..." : "";
+            document.getElementById('info-msg').innerText = 'NPC対戦中...';
             
             timerId = setInterval(typewriterEffect, TYPING_SPEED);
         };
@@ -236,14 +234,14 @@
                 document.getElementById('question-box').innerText = displayedQuestion;
 
                 // Qモード時：NPCの押しタイミングに達した場合
-                if (currentMode === 'q' && charIndex === npcPressCharIndex && !isPressed) {
+                if (charIndex === npcPressCharIndex && !isPressed) {
                     clearInterval(timerId);
                     npcPress();
                 }
             } else {
                 // 問題を最後まで読み終えた場合
                 clearInterval(timerId);
-                if (currentMode === 'q' && !isPressed) {
+                if (!isPressed) {
                     // NPCも押さず最後まで来たら、NPCは文末(総文字数)のタイミングで押したとみなす
                     npcPressCharIndex = fullQuestion.length;
                     npcPress();
@@ -261,7 +259,7 @@
             winner = "player";
 
             document.getElementById('push-btn').disabled = true;
-            showAnswerArea(`あなたが ${pressedCountByPlayer} 文字目でボタンを押しました！`);
+            showAnswerArea('あなたが押しました。');
         }
 
         // NPCが先に押した場合の処理
@@ -269,57 +267,43 @@
             isPressed = true;
             winner = "npc";
             document.getElementById('push-btn').disabled = true;
-            showAnswerArea(`NPCが ${npcPressCharIndex} 文字目で先にボタンを押しました！`);
+            showAnswerArea('NPCが先に押しました。');
             
             // NPCが先に押した＝プレイヤーの負けなので、〇×自己申告はスキップ
             document.getElementById('judge-section').style.display = 'none';
-            document.getElementById('next-btn').style.display = 'block';
+            setTimeout(() => nextQuestion(), 300);
         }
 
         // 答えを表示する共通処理
         function showAnswerArea(statusText) {
-            document.getElementById('status-label').innerText = statusText;
+            document.getElementById('status-label').innerText = statusText || '';
             document.getElementById('answer-box').innerText = currentQuiz.answer;
             document.getElementById('result-box').style.display = 'block';
+            document.getElementById('judge-section').style.display = 'flex';
         }
 
         // 〇×ボタンが押されたとき（通常モード、または自分が先に押したQモード）
         async function submitResult(isCorrect) {
             document.getElementById('judge-section').style.display = 'none';
             
-            // 通常モード、かつ 〇（正解）だった場合のみデータを保存
-            if (currentMode === 'normal' && isCorrect) {
-                if (pressedCountByPlayer < 5) {
-                    document.getElementById('info-msg').innerText = "※5文字未満での検知のため、データは除外（保存されません）されました。";
-                } else {
-                    document.getElementById('info-msg').innerText = "データを送信中...";
-                    
-                    // Supabaseへインサート
-                    const { error } = await supabase
-                        .from('play_logs')
-                        .insert([
-                            { 
-                                quiz_id: currentQuiz.id, 
-                                pressed_chars: pressedCountByPlayer, 
-                                is_correct: true 
-                            }
-                        ]);
+            const { error } = await supabaseClient
+                .from('play_logs')
+                .insert([{ quiz_id: currentQuiz.id, pressed_chars: pressedCountByPlayer, is_correct: isCorrect }]);
 
-                    if (error) {
-                        document.getElementById('info-msg').innerText = "データの保存に失敗しました。";
-                    } else {
-                        document.getElementById('info-msg').innerText = `正解データを保存しました！（確定値: ${pressedCountByPlayer}文字）`;
-                    }
-                }
-            } else if (currentMode === 'q' && winner === 'player') {
-                if (isCorrect) {
-                    document.getElementById('info-msg').innerText = "見事NPCより早く正解しました！あなたの勝ちです！";
-                } else {
-                    document.getElementById('info-msg').innerText = "あなたが先に押しましたが、不正解（×）のためあなたの負けです。";
-                }
+            if (error) {
+                const reason = error.message || '不明なエラー';
+                const detail = error.code ? ` (code: ${error.code})` : '';
+                document.getElementById('info-msg').innerText = `データ保存に失敗しました。${reason}${detail}`;
+            } else {
+                document.getElementById('info-msg').innerText = '保存しました。';
             }
 
-            document.getElementById('next-btn').style.display = 'block';
+            setTimeout(() => nextQuestion(), 300);
+        }
+
+        async function nextQuestion() {
+            document.getElementById('result-box').style.display = 'none';
+            await startQuiz();
         }
 
         // 初期起動
