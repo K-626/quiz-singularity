@@ -1,177 +1,135 @@
 <!DOCTYPE html>
 <html lang="ja">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>クイズ問題一括登録（管理者用）</title>
+    <title>早押しクイズ</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body {
             font-family: 'Helvetica Neue', Arial, sans-serif;
             background-color: #f4f7f6;
             color: #333;
-            max-width: 640px;
+            max-width: 600px;
             margin: 40px auto;
             padding: 20px;
+            text-align: center;
         }
-
         .card {
             background: white;
             padding: 30px;
             border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
-
-        h1 {
-            text-align: center;
-            font-size: 24px;
-            color: #2c3e50;
-        }
-
-        h2 {
-            font-size: 16px;
-            color: #555;
-            margin-top: 0;
-        }
-
-        .file-input-area {
-            border: 2px dashed #3498db;
-            padding: 30px;
-            text-align: center;
-            background: #ecf0f1;
-            border-radius: 8px;
-            margin: 20px 0;
-            cursor: pointer;
-        }
-
-        .btn {
-            display: block;
-            width: 100%;
-            padding: 12px;
+        .start-btn {
             font-size: 18px;
-            color: white;
-            background-color: #2ecc71;
+            padding: 12px 24px;
+            margin: 10px;
+            cursor: pointer;
             border: none;
             border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        .btn-secondary {
             background-color: #3498db;
-            font-size: 15px;
-            padding: 10px;
+            color: white;
+            transition: 0.2s;
         }
+        .start-btn:hover { background-color: #2980b9; }
 
-        .btn:disabled {
-            background-color: #bdc3c7;
-            cursor: not-allowed;
-        }
-
-        .status {
-            margin-top: 15px;
+        .quiz-area { display: none; width: 100%; }
+        .question-text {
+            font-size: 22px;
             font-weight: bold;
-            text-align: center;
-            padding: 10px;
-            border-radius: 6px;
-        }
-
-        .status.success { background: #eafaf1; color: #2ecc71; }
-        .status.error   { background: #fdf2f2; color: #e74c3c; }
-        .status.info    { background: #eaf4fb; color: #2980b9; }
-
-        .format-info {
-            background: #fffde7;
-            padding: 15px;
-            border-radius: 6px;
-            font-size: 14px;
-            border: 1px solid #fff59d;
+            min-height: 80px;
+            line-height: 1.5;
+            text-align: left;
+            width: 100%;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
             margin-bottom: 20px;
         }
-
-        .error-detail {
-            margin-top: 10px;
-            font-size: 13px;
-            font-family: monospace;
-            background: #fff0f0;
-            padding: 10px;
-            border-radius: 6px;
-            border: 1px solid #f5c6c6;
-            text-align: left;
-            white-space: pre-wrap;
-            word-break: break-all;
-            display: none;
-        }
-
-        .preview-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 13px;
-            margin-top: 10px;
-        }
-
-        .preview-table th {
-            background: #3498db;
+        .action-btn {
+            font-size: 24px;
+            padding: 15px 40px;
+            background-color: #e74c3c;
             color: white;
-            padding: 6px 10px;
-            text-align: left;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            margin: 0 auto 12px auto;
+            display: block;
+            transition: background-color 0.2s;
         }
-
-        .preview-table td {
-            padding: 6px 10px;
-            border-bottom: 1px solid #eee;
+        .action-btn.show-answer-mode {
+            background-color: #3498db; /* 回答表示モード時は青色に */
         }
-
-        .preview-table tr:nth-child(even) td { background: #f9f9f9; }
+        .action-btn:disabled { background-color: #bdc3c7; cursor: not-allowed; }
+        
+        .judge-btns {
+            display: flex;
+            justify-content: center;
+            gap: 20px; /* ボタン間隔を少し広げて対称性を強調 */
+            margin: 15px 0;
+        }
+        .judge-btns button {
+            font-size: 24px;
+            padding: 12px 40px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            color: white;
+            font-weight: bold;
+            transition: transform 0.1s;
+        }
+        .judge-btns button:active {
+            transform: scale(0.95);
+        }
+        #btn-circle { background-color: #2ecc71; }
+        #btn-cross { background-color: #e74c3c; }
+        
+        .answer-text { font-size: 28px; color: #2c3e50; font-weight: bold; margin-bottom: 20px; }
+        .status-msg { font-size: 16px; color: #7f8c8d; margin-top: 15px; }
     </style>
 </head>
-
 <body>
 
-    <!-- 接続テスト -->
+    <h1>早押しタイピングクイズ</h1>
+    
     <div class="card">
-        <h2>🔌 Step 1: Supabase 接続テスト</h2>
-        <button class="btn btn-secondary" onclick="testConnection()">接続テストを実行する</button>
-        <div id="test-msg" class="status" style="display:none;"></div>
-        <div id="test-detail" class="error-detail"></div>
-    </div>
-
-    <!-- CSV登録 -->
-    <div class="card">
-        <h1>クイズ問題 一括CSV登録</h1>
-
-        <div class="format-info">
-            <strong>【CSVファイルの形式】</strong><br>
-            Excel等で作成し、必ず<strong>UTF-8形式のCSV</strong>で保存してください。<br>
-            1行目はヘッダー（問題文,答え）として読み飛ばします。<br>
-            <br>
-            <code>
-            問題文,答え<br>
-            日本で一番高い山は？,富士山<br>
-            日本の首都はどこ？,東京
-            </code>
+        <div id="start-screen" class="mode-selection">
+            <button id="start-btn" class="start-btn" onclick="startQuiz()">ボタンにつく</button>
         </div>
 
-        <div class="file-input-area" onclick="document.getElementById('csv-file').click()">
-            <p>ここをクリックしてCSVファイルを選択</p>
-            <input type="file" id="csv-file" accept=".csv" style="display:none;" onchange="handleFileSelect()">
-            <div id="file-name" style="color: #3498db; font-weight: bold;"></div>
+        <div id="quiz-screen" class="quiz-area">
+            <!-- 問題表示エリア -->
+            <div id="question-box" class="question-text"></div>
+            
+            <!-- ステータスラベル -->
+            <div id="status-label" style="font-size: 18px; margin-bottom: 15px; font-weight: bold; min-height: 27px;"></div>
+            
+            <!-- アクションボタン（「押す！」または「回答を表示」に変化） -->
+            <button id="push-btn" class="action-btn" onclick="handlePushBtnClick()">slash</button>
+
+            <!-- 自己申告〇×判定（ボタンの真下に配置され、中央で対称に並ぶ） -->
+            <div id="judge-section" style="display: none; width: 100%;">
+                <div class="judge-btns">
+                    <button id="btn-circle" onclick="submitResult(true)">〇</button>
+                    <button id="btn-cross" onclick="submitResult(false)">×</button>
+                </div>
+            </div>
+
+            <!-- 回答表示エリア -->
+            <div id="answer-area" style="display: none; margin-top: 25px; width: 100%;">
+                <div style="font-size: 14px; color: #7f8c8d; margin-bottom: 5px;">答え</div>
+                <div id="answer-box" class="answer-text"></div>
+            </div>
+            
+            <div id="info-msg" class="status-msg"></div>
         </div>
-
-        <!-- プレビュー -->
-        <div id="preview-area" style="display:none; margin-bottom: 15px;">
-            <strong>📋 読み込みプレビュー（最初の5件）</strong>
-            <div id="preview-table-container"></div>
-            <div id="preview-count" style="font-size:13px; color:#777; margin-top:5px;"></div>
-        </div>
-
-        <button id="upload-btn" class="btn" onclick="uploadCSV()" disabled>登録を実行する</button>
-
-        <div id="status-msg" class="status" style="display:none;"></div>
-        <div id="error-detail" class="error-detail"></div>
     </div>
 
     <script>
@@ -180,155 +138,249 @@
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9nZWp2ZWx5bGR4ZmZibGp6Z2F2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0MzcwOTEsImV4cCI6MjA5NzAxMzA5MX0.mo0l3aEgR3gkc-6_2p3_O1WHISxN2tB9ooUFfyDkQXY';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        let parsedQuizData = [];
+        // --- 状態管理用変数 ---
+        let currentMode = 'battle';
+        let currentQuiz = null;
+        let fullQuestion = "";
+        let displayedQuestion = "";
+        let charIndex = 0;
+        let timerId = null;
+        let isPressed = false;
+        
+        let pressedCountByPlayer = 0; // プレイヤーが押した時の文字数
+        let npcPressCharIndex = -1;   // NPCが押す予定の文字数
+        let winner = "";              // "player" or "npc"
+        let buttonState = 'push';     // 'push' (押す！), 'show_answer' (回答を表示), 'none' (無効)
 
-        // ---- 接続テスト ----
-        async function testConnection() {
-            const msg = document.getElementById('test-msg');
-            const detail = document.getElementById('test-detail');
-            msg.className = 'status info';
-            msg.style.display = 'block';
-            msg.innerText = '接続テスト中...';
-            detail.style.display = 'none';
+        // タイピングの速度（ミリ秒単位 / 1文字ごと）
+        const TYPING_SPEED = 150;
+        const FALLBACK_QUIZZES = [
+            { id: 'fallback-1', question: 'JavaScriptはブラウザで動く言語です', answer: 'JavaScript' },
+            { id: 'fallback-2', question: 'HTMLは文書の骨組みを作る言語です', answer: 'HTML' },
+            { id: 'fallback-3', question: 'CSSは見た目を整える言語です', answer: 'CSS' }
+        ];
 
+        // アプリ初期化
+        function initApp() {
+            document.getElementById('start-screen').style.display = 'block';
+            document.getElementById('quiz-screen').style.display = 'none';
+            document.getElementById('answer-area').style.display = 'none';
+            document.getElementById('judge-section').style.display = 'none';
+            document.getElementById('status-label').innerText = "";
+            document.getElementById('info-msg').innerText = "";
+            
+            const pushBtn = document.getElementById('push-btn');
+            pushBtn.style.display = 'block';
+            pushBtn.disabled = false;
+            pushBtn.innerText = "押す！";
+            pushBtn.className = "action-btn";
+            
+            isPressed = false;
+            winner = "";
+            buttonState = 'push';
+        }
+
+        // クイズ開始
+        async function startQuiz() {
+            // 状態をリセット
+            isPressed = false;
+            winner = "";
+            pressedCountByPlayer = 0;
+            npcPressCharIndex = -1;
+            charIndex = 0;
+            displayedQuestion = "";
+            buttonState = 'push';
+            if (timerId) {
+                clearInterval(timerId);
+                timerId = null;
+            }
+
+            currentMode = 'battle';
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('quiz-screen').style.display = 'block';
+            
+            document.getElementById('answer-area').style.display = 'none';
+            document.getElementById('judge-section').style.display = 'none';
+            document.getElementById('status-label').innerText = "";
+            document.getElementById('info-msg').innerText = "";
+
+            const pushBtn = document.getElementById('push-btn');
+            pushBtn.style.display = 'block';
+            pushBtn.disabled = false;
+            pushBtn.innerText = "押す！";
+            pushBtn.className = "action-btn";
+
+            document.getElementById('question-box').innerText = "読み込み中...";
+
+            // 1. Supabaseからランダムに1問取得（失敗時はローカルの代替問題を使う）
+            let quizzes = [];
+            let fetchError = null;
             try {
-                const { data, error } = await supabaseClient.from('quizzes').select('id').limit(1);
-                if (error) {
-                    msg.className = 'status error';
-                    msg.innerText = '❌ 接続エラー';
-                    detail.style.display = 'block';
-                    detail.innerText =
-                        `code: ${error.code || 'なし'}\n` +
-                        `message: ${error.message || 'なし'}\n` +
-                        `details: ${error.details || 'なし'}\n` +
-                        `hint: ${error.hint || 'なし'}`;
+                const result = await supabaseClient.from('quizzes').select('*');
+                quizzes = result.data || [];
+                fetchError = result.error;
+            } catch (e) {
+                fetchError = e;
+            }
+
+            if (fetchError || quizzes.length === 0) {
+                currentQuiz = FALLBACK_QUIZZES[Math.floor(Math.random() * FALLBACK_QUIZZES.length)];
+                document.getElementById('info-msg').innerText = 'Supabaseの取得に失敗したため、サンプル問題を使用します。';
+            } else {
+                currentQuiz = quizzes[Math.floor(Math.random() * quizzes.length)];
+            }
+            fullQuestion = currentQuiz.question;
+            
+            // 2. NPCの押しタイミングを計算
+            document.getElementById('info-msg').innerText = 'NPC対戦中...';
+            try {
+                const { data: logs } = await supabaseClient
+                    .from('play_logs')
+                    .select('pressed_chars')
+                    .eq('quiz_id', currentQuiz.id)
+                    .eq('is_correct', true)
+                    .gte('pressed_chars', 5)
+                    .order('pressed_chars', { ascending: true })
+                    .limit(1);
+
+                if (logs && logs.length > 0) {
+                    npcPressCharIndex = logs[0].pressed_chars;
                 } else {
-                    msg.className = 'status success';
-                    msg.innerText = `✅ 接続成功！quizzes テーブルに接続できました。現在 ${data.length} 件確認。`;
+                    const randomFactor = Math.random() * (0.8 - 0.2) + 0.2;
+                    npcPressCharIndex = Math.round(fullQuestion.length * randomFactor);
                 }
             } catch (e) {
-                msg.className = 'status error';
-                msg.innerText = '❌ 例外エラー（ネットワークまたはSDK）';
-                detail.style.display = 'block';
-                detail.innerText = e.toString();
+                const randomFactor = Math.random() * (0.8 - 0.2) + 0.2;
+                npcPressCharIndex = Math.round(fullQuestion.length * randomFactor);
+            }
+
+            // 3. タイピングスタート
+            document.getElementById('question-box').innerText = "";
+            document.getElementById('info-msg').innerText = 'NPC対戦中...';
+            
+            timerId = setInterval(typewriterEffect, TYPING_SPEED);
+        }
+
+        // タイピングエフェクト処理
+        function typewriterEffect() {
+            if (charIndex < fullQuestion.length) {
+                displayedQuestion += fullQuestion[charIndex];
+                charIndex++;
+                document.getElementById('question-box').innerText = displayedQuestion;
+
+                // NPCの押しタイミングに達した場合
+                if (charIndex >= npcPressCharIndex && !isPressed) {
+                    clearInterval(timerId);
+                    timerId = null;
+                    npcPress();
+                }
+            } else {
+                // 問題を最後まで読み終えた場合
+                clearInterval(timerId);
+                timerId = null;
+                if (!isPressed) {
+                    // 最後まで誰も押さなかった場合、NPCが文末で押したとみなす
+                    npcPressCharIndex = fullQuestion.length;
+                    npcPress();
+                }
             }
         }
 
-        // ---- ファイル選択 ----
-        function handleFileSelect() {
-            const fileInput = document.getElementById('csv-file');
-            const fileNameDiv = document.getElementById('file-name');
-            const uploadBtn = document.getElementById('upload-btn');
-            const previewArea = document.getElementById('preview-area');
-
-            parsedQuizData = [];
-            previewArea.style.display = 'none';
-            uploadBtn.disabled = true;
-
-            if (fileInput.files.length === 0) {
-                fileNameDiv.innerText = '';
-                return;
+        // メインアクションボタンがクリックされた時の振り分け
+        function handlePushBtnClick() {
+            if (buttonState === 'push') {
+                pressButton();
+            } else if (buttonState === 'show_answer') {
+                showAnswer();
             }
+        }
 
-            const file = fileInput.files[0];
-            fileNameDiv.innerText = `選択中: ${file.name}`;
+        // プレイヤーが「押す！」ボタンをクリックしたとき
+        function pressButton() {
+            if (isPressed) return;
+            isPressed = true;
+            clearInterval(timerId);
+            timerId = null;
+            
+            pressedCountByPlayer = charIndex; // 押した時点の文字数を記録
+            winner = "player";
 
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                const text = e.target.result;
-                const lines = text.split(/\r?\n/);
+            document.getElementById('status-label').innerText = 'あなたが押しました！回答してください。';
+            
+            // ボタンを「回答を表示」モードに変更
+            const pushBtn = document.getElementById('push-btn');
+            pushBtn.innerText = "回答を表示";
+            pushBtn.classList.add('show-answer-mode');
+            buttonState = 'show_answer';
+        }
 
-                for (let i = 1; i < lines.length; i++) {
-                    const line = lines[i].trim();
-                    if (!line) continue;
-                    const columns = line.split(',');
-                    if (columns.length >= 2) {
-                        const question = columns[0].trim();
-                        const answer = columns[1].trim();
-                        if (question && answer) {
-                            parsedQuizData.push({ question, answer });
-                        }
+        // 「回答を表示」ボタンをクリックしたとき
+        function showAnswer() {
+            buttonState = 'none';
+            
+            // 回答表示ボタンは役目を終えたので非表示にする
+            document.getElementById('push-btn').style.display = 'none';
+
+            // 答えを表示
+            document.getElementById('answer-box').innerText = currentQuiz.answer;
+            document.getElementById('answer-area').style.display = 'block';
+
+            // 〇×判定を表示（ボタンの真下に表示される）
+            document.getElementById('judge-section').style.display = 'block';
+        }
+
+        // NPCが先に押した場合の処理
+        function npcPress() {
+            if (isPressed) return; // 二重発火防止
+            isPressed = true;
+            winner = "npc";
+            
+            // アクションボタンを非表示
+            document.getElementById('push-btn').style.display = 'none';
+            buttonState = 'none';
+
+            document.getElementById('status-label').innerText = 'NPCが先に押しました。';
+            
+            // NPCの場合は即時答えを表示（自己申告は不要）
+            document.getElementById('answer-box').innerText = currentQuiz.answer;
+            document.getElementById('answer-area').style.display = 'block';
+            document.getElementById('judge-section').style.display = 'none';
+
+            setTimeout(() => nextQuestion(), 2000);
+        }
+
+        // 〇×ボタンが押されたとき
+        async function submitResult(isCorrect) {
+            document.getElementById('judge-section').style.display = 'none';
+            
+            // フォールバック問題の場合はDBへの保存をスキップ
+            if (currentQuiz.id && !String(currentQuiz.id).startsWith('fallback')) {
+                try {
+                    const { error } = await supabaseClient
+                        .from('play_logs')
+                        .insert([{ quiz_id: currentQuiz.id, pressed_chars: pressedCountByPlayer, is_correct: isCorrect }]);
+
+                    if (error) {
+                        const reason = error.message || '不明なエラー';
+                        const detail = error.code ? ` (code: ${error.code})` : '';
+                        document.getElementById('info-msg').innerText = `データ保存に失敗しました。${reason}${detail}`;
+                    } else {
+                        document.getElementById('info-msg').innerText = '保存しました。';
                     }
+                } catch (e) {
+                    document.getElementById('info-msg').innerText = `保存エラー: ${e.message}`;
                 }
-
-                if (parsedQuizData.length === 0) {
-                    showStatus('status-msg', 'error', '有効なデータが見つかりません。CSVの形式を確認してください。');
-                    return;
-                }
-
-                // プレビュー表示
-                showPreview(parsedQuizData);
-                uploadBtn.disabled = false;
-            };
-            reader.readAsText(file, 'UTF-8');
-        }
-
-        function showPreview(data) {
-            const previewArea = document.getElementById('preview-area');
-            const container = document.getElementById('preview-table-container');
-            const countDiv = document.getElementById('preview-count');
-
-            const preview = data.slice(0, 5);
-            let html = '<table class="preview-table"><thead><tr><th>#</th><th>問題文</th><th>答え</th></tr></thead><tbody>';
-            preview.forEach((row, i) => {
-                html += `<tr><td>${i + 1}</td><td>${escapeHtml(row.question)}</td><td>${escapeHtml(row.answer)}</td></tr>`;
-            });
-            html += '</tbody></table>';
-
-            container.innerHTML = html;
-            countDiv.innerText = `合計 ${data.length} 件のデータを検出しました。`;
-            previewArea.style.display = 'block';
-        }
-
-        function escapeHtml(str) {
-            return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-        }
-
-        // ---- アップロード処理 ----
-        async function uploadCSV() {
-            if (parsedQuizData.length === 0) return;
-
-            const uploadBtn = document.getElementById('upload-btn');
-            const errorDetail = document.getElementById('error-detail');
-            uploadBtn.disabled = true;
-            errorDetail.style.display = 'none';
-
-            showStatus('status-msg', 'info', `${parsedQuizData.length}件をデータベースに送信中...`);
-
-            try {
-                const { error } = await supabaseClient.from('quizzes').insert(parsedQuizData);
-
-                if (error) {
-                    showStatus('status-msg', 'error', `❌ 登録失敗`);
-                    errorDetail.style.display = 'block';
-                    errorDetail.innerText =
-                        `code: ${error.code || 'なし'}\n` +
-                        `message: ${error.message || 'なし'}\n` +
-                        `details: ${error.details || 'なし'}\n` +
-                        `hint: ${error.hint || 'なし'}`;
-                    uploadBtn.disabled = false;
-                } else {
-                    showStatus('status-msg', 'success', `🎉 成功！ ${parsedQuizData.length}件のクイズを登録しました！`);
-                    document.getElementById('csv-file').value = '';
-                    document.getElementById('file-name').innerText = '';
-                    document.getElementById('preview-area').style.display = 'none';
-                    parsedQuizData = [];
-                }
-            } catch (e) {
-                showStatus('status-msg', 'error', '❌ 例外エラーが発生しました');
-                errorDetail.style.display = 'block';
-                errorDetail.innerText = e.toString();
-                uploadBtn.disabled = false;
             }
+
+            setTimeout(() => nextQuestion(), 1000);
         }
 
-        function showStatus(id, type, text) {
-            const el = document.getElementById(id);
-            el.className = `status ${type}`;
-            el.style.display = 'block';
-            el.innerText = text;
+        async function nextQuestion() {
+            await startQuiz();
         }
+
+        // 初期起動
+        window.onload = initApp;
     </script>
 </body>
-
 </html>
