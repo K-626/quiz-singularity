@@ -363,9 +363,9 @@
                     if (error) {
                         const reason = error.message || '不明なエラー';
                         const detail = error.code ? ` (code: ${error.code})` : '';
-                        document.getElementById('info-msg').innerText = `データ保存に失敗しました。${reason}${detail}`;
+                        document.getElementById('info-msg').innerText = `。${reason}${detail}`;
                     } else {
-                        document.getElementById('info-msg').innerText = '保存しました。';
+                        document.getElementById('info-msg').innerText = '.';
                     }
                 } catch (e) {
                     document.getElementById('info-msg').innerText = `保存エラー: ${e.message}`;
