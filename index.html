@@ -39,42 +39,6 @@
         }
         .start-btn:hover { background-color: #2980b9; }
 
-        /* キーコンフィグ用のスタイル */
-        .config-section {
-            background: #edf2f7;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 25px;
-            width: 100%;
-            box-sizing: border-box;
-        }
-        .config-title {
-            font-size: 15px;
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #4a5568;
-        }
-        .config-row {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-        }
-        .config-btn {
-            background: white;
-            border: 1px solid #cbd5e0;
-            padding: 8px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            min-width: 80px;
-            transition: background-color 0.2s;
-        }
-        .config-btn.waiting {
-            background: #feebc8;
-            border-color: #fbd38d;
-            color: #c05621;
-        }
-
         .quiz-area { display: none; width: 100%; }
         .question-text {
             font-size: 22px;
@@ -88,7 +52,7 @@
             margin-bottom: 20px;
         }
         .action-btn {
-            font-size: 20px;
+            font-size: 24px;
             padding: 15px 40px;
             background-color: #e74c3c;
             color: white;
@@ -102,14 +66,13 @@
         }
         .action-btn.show-answer-mode {
             background-color: #3498db; /* 回答表示モード時は青色に */
-            cursor: pointer;
         }
-        .action-btn:disabled { background-color: #bdc3c7; cursor: not-allowed; box-shadow: none; }
+        .action-btn:disabled { background-color: #bdc3c7; cursor: not-allowed; }
         
         .judge-btns {
             display: flex;
             justify-content: center;
-            gap: 20px;
+            gap: 20px; /* ボタン間隔を少し広げて対称性を強調 */
             margin: 15px 0;
         }
         .judge-btns button {
@@ -130,6 +93,104 @@
         
         .answer-text { font-size: 28px; color: #2c3e50; font-weight: bold; margin-bottom: 20px; }
         .status-msg { font-size: 16px; color: #7f8c8d; margin-top: 15px; }
+
+        /* --- 対戦人数選択 --- */
+        .player-count-select { width: 100%; margin-bottom: 18px; }
+        .select-label { font-size: 14px; color: #7f8c8d; margin-bottom: 8px; font-weight: bold; }
+        .toggle-group { display: flex; justify-content: center; gap: 10px; }
+        .toggle-btn {
+            font-size: 15px;
+            padding: 10px 18px;
+            border: 2px solid #3498db;
+            border-radius: 6px;
+            background-color: white;
+            color: #3498db;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .toggle-btn.active { background-color: #3498db; color: white; }
+        .toggle-btn:hover { background-color: #ebf5fb; }
+        .toggle-btn.active:hover { background-color: #2980b9; }
+
+        /* --- キーコンフィグパネル --- */
+        .key-config-panel { width: 100%; margin-bottom: 18px; border: 1px solid #e0e0e0; border-radius: 8px; }
+        .config-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 14px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #555;
+        }
+        .config-toggle-btn {
+            font-size: 13px;
+            padding: 6px 12px;
+            border: 1px solid #bdc3c7;
+            border-radius: 5px;
+            background: #f8f9f9;
+            color: #555;
+            cursor: pointer;
+        }
+        .config-toggle-btn:hover { background: #eef1f1; }
+        .config-body { padding: 0 14px 14px 14px; text-align: left; }
+        .player-config { margin-bottom: 14px; padding: 10px; background: #fafbfb; border-radius: 6px; }
+        .player-config-title { font-size: 13px; font-weight: bold; color: #34495e; margin-bottom: 8px; }
+        .key-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        .key-row-label { font-size: 13px; color: #555; }
+        .key-capture-btn {
+            font-size: 13px;
+            min-width: 90px;
+            padding: 6px 10px;
+            border: 1px solid #bdc3c7;
+            border-radius: 5px;
+            background: white;
+            color: #2c3e50;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.15s;
+        }
+        .key-capture-btn:hover { border-color: #3498db; color: #3498db; }
+        .key-capture-btn.listening {
+            background-color: #f39c12;
+            border-color: #f39c12;
+            color: white;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+        .config-hint { font-size: 12px; color: #95a5a6; margin: 6px 0 10px 0; }
+        .config-reset-btn {
+            font-size: 12px;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 5px;
+            background: #ecf0f1;
+            color: #7f8c8d;
+            cursor: pointer;
+        }
+        .config-reset-btn:hover { background: #dfe6e6; }
+
+        /* --- プレイヤーエリア（2人対戦対応） --- */
+        .player-area {
+            width: 100%;
+            padding: 14px 0;
+            border-top: 1px dashed #ecf0f1;
+        }
+        .player-area:first-of-type { border-top: none; }
+        .player-area-title {
+            font-size: 13px;
+            font-weight: bold;
+            color: #95a5a6;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+        .player-area.player-won .player-area-title { color: #e67e22; }
+        .judge-section { width: 100%; }
     </style>
 </head>
 <body>
@@ -138,36 +199,90 @@
     
     <div class="card">
         <div id="start-screen" class="mode-selection">
-            <div class="config-section">
-                <div class="config-title">⌨️ キーボード早押し設定</div>
-                <div class="config-row">
-                    <div>
-                        <span style="font-size: 14px; margin-right: 5px;">プレイヤー1:</span>
-                        <button id="config-p1-btn" class="config-btn" onclick="startKeyConfig('p1')">F</button>
-                    </div>
-                    <div>
-                        <span style="font-size: 14px; margin-right: 5px;">プレイヤー2:</span>
-                        <button id="config-p2-btn" class="config-btn" onclick="startKeyConfig('p2')">J</button>
-                    </div>
+            <div class="player-count-select">
+                <div class="select-label">対戦人数</div>
+                <div class="toggle-group">
+                    <button type="button" id="mode-1p-btn" class="toggle-btn active" onclick="setPlayerCount(1)">1人 (vs CPU)</button>
+                    <button type="button" id="mode-2p-btn" class="toggle-btn" onclick="setPlayerCount(2)">2人 (vs CPU)</button>
                 </div>
             </div>
+
+            <div id="key-config-panel" class="key-config-panel">
+                <div class="config-header">
+                    <span>キーボード設定</span>
+                    <button type="button" id="config-toggle-btn" class="config-toggle-btn" onclick="toggleConfigPanel()">設定を開く ▾</button>
+                </div>
+                <div id="config-body" class="config-body" style="display:none;">
+                    <div class="player-config" id="player1-config">
+                        <div class="player-config-title">プレイヤー1</div>
+                        <div class="key-row">
+                            <span class="key-row-label">押す／回答表示</span>
+                            <button type="button" class="key-capture-btn" data-player="1" data-action="push">未設定</button>
+                        </div>
+                        <div class="key-row">
+                            <span class="key-row-label">〇（正解）</span>
+                            <button type="button" class="key-capture-btn" data-player="1" data-action="circle">未設定</button>
+                        </div>
+                        <div class="key-row">
+                            <span class="key-row-label">×（不正解）</span>
+                            <button type="button" class="key-capture-btn" data-player="1" data-action="cross">未設定</button>
+                        </div>
+                    </div>
+                    <div class="player-config" id="player2-config" style="display:none;">
+                        <div class="player-config-title">プレイヤー2</div>
+                        <div class="key-row">
+                            <span class="key-row-label">押す／回答表示</span>
+                            <button type="button" class="key-capture-btn" data-player="2" data-action="push">未設定</button>
+                        </div>
+                        <div class="key-row">
+                            <span class="key-row-label">〇（正解）</span>
+                            <button type="button" class="key-capture-btn" data-player="2" data-action="circle">未設定</button>
+                        </div>
+                        <div class="key-row">
+                            <span class="key-row-label">×（不正解）</span>
+                            <button type="button" class="key-capture-btn" data-player="2" data-action="cross">未設定</button>
+                        </div>
+                    </div>
+                    <div class="config-hint" id="config-hint">割り当てたいキーのボタンをクリックしてから、キーボードでキーを押してください。</div>
+                    <button type="button" class="config-reset-btn" onclick="resetKeyConfig()">既定値にリセット</button>
+                </div>
+            </div>
+
             <button id="start-btn" class="start-btn" onclick="startQuiz()">ボタンにつく</button>
         </div>
 
         <div id="quiz-screen" class="quiz-area">
+            <!-- 問題表示エリア -->
             <div id="question-box" class="question-text"></div>
             
+            <!-- ステータスラベル -->
             <div id="status-label" style="font-size: 18px; margin-bottom: 15px; font-weight: bold; min-height: 27px;"></div>
-            
-            <button id="push-btn" class="action-btn" onclick="handlePushBtnClick()"></button>
 
-            <div id="judge-section" style="display: none; width: 100%;">
-                <div class="judge-btns">
-                    <button id="btn-circle" onclick="submitResult(true)">〇</button>
-                    <button id="btn-cross" onclick="submitResult(false)">×</button>
+            <!-- プレイヤー1エリア -->
+            <div id="player1-area" class="player-area">
+                <div class="player-area-title" id="player1-area-title">プレイヤー1</div>
+                <button id="push-btn-1" class="action-btn" onclick="handlePushBtnClick(1)">押す！</button>
+                <div id="judge-section-1" class="judge-section" style="display: none;">
+                    <div class="judge-btns">
+                        <button id="btn-circle-1" onclick="submitResult(1, true)">〇</button>
+                        <button id="btn-cross-1" onclick="submitResult(1, false)">×</button>
+                    </div>
                 </div>
             </div>
 
+            <!-- プレイヤー2エリア（2人対戦時のみ表示） -->
+            <div id="player2-area" class="player-area" style="display: none;">
+                <div class="player-area-title" id="player2-area-title">プレイヤー2</div>
+                <button id="push-btn-2" class="action-btn" onclick="handlePushBtnClick(2)">押す！</button>
+                <div id="judge-section-2" class="judge-section" style="display: none;">
+                    <div class="judge-btns">
+                        <button id="btn-circle-2" onclick="submitResult(2, true)">〇</button>
+                        <button id="btn-cross-2" onclick="submitResult(2, false)">×</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 回答表示エリア -->
             <div id="answer-area" style="display: none; margin-top: 25px; width: 100%;">
                 <div style="font-size: 14px; color: #7f8c8d; margin-bottom: 5px;">答え</div>
                 <div id="answer-box" class="answer-text"></div>
@@ -184,23 +299,22 @@
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         // --- 状態管理用変数 ---
-        let currentMode = 'battle';
         let currentQuiz = null;
         let fullQuestion = "";
         let displayedQuestion = "";
         let charIndex = 0;
         let timerId = null;
-        let isPressed = false;
-        
-        let pressedCountByPlayer = 0; // プレイヤーが押した時の文字数
-        let npcPressCharIndex = -1;   // NPCが押す予定の文字数
-        let winner = "";              // "player1", "player2", "npc"
-        let buttonState = 'push';     // 'push' (早押し中), 'show_answer' (回答を表示), 'none' (無効)
+        let roundOver = false;       // このラウンドの勝者が確定したら true（以後のボタン入力は無視）
+        let playerCount = 1;         // 1 or 2
 
-        // キーコンフィグ用
-        let p1Key = 'f';
-        let p2Key = 'j';
-        let configuringPlayer = null; // 'p1' or 'p2' or null
+        let npcPressCharIndex = -1;  // NPCが押す予定の文字数
+
+        // プレイヤーごとの状態を配列で管理（index 0 = プレイヤー1, index 1 = プレイヤー2）
+        // state: 'push' (押す！を待っている), 'show_answer' (回答を表示待ち), 'judging' (〇×待ち), 'done' (このラウンド終了)
+        let players = [
+            { id: 1, pressedChars: 0, state: 'push' },
+            { id: 2, pressedChars: 0, state: 'push' }
+        ];
 
         // タイピングの速度（ミリ秒単位 / 1文字ごと）
         const TYPING_SPEED = 150;
@@ -210,136 +324,218 @@
             { id: 'fallback-3', question: 'CSSは見た目を整える言語です', answer: 'CSS' }
         ];
 
-        // 表示用のキー名整形（スペースキー対策）
-        function getKeyDisplayName(key) {
-            if (key === ' ') return 'SPACE';
-            return key.toUpperCase();
+        // --- キーコンフィグ ---
+        // ページを離れると初期化される、インメモリの設定（localStorageは使用しない）
+        const DEFAULT_KEY_CONFIG = {
+            1: { push: 'Space', circle: 'KeyZ', cross: 'KeyX' },
+            2: { push: 'Enter', circle: 'Slash', cross: 'Period' } // / と . を○×に割当
+        };
+        // 構造をディープコピーして使う
+        let keyConfig = JSON.parse(JSON.stringify(DEFAULT_KEY_CONFIG));
+
+        // キー名の表示用ラベル
+        const KEY_LABELS = {
+            'Space': 'Space',
+            'Enter': 'Enter',
+            'ShiftLeft': '左Shift',
+            'ShiftRight': '右Shift',
+            'ControlLeft': '左Ctrl',
+            'ControlRight': '右Ctrl',
+            'Slash': '/',
+            'Period': '.',
+            'Comma': ',',
+            'Quote': "'",
+            'Semicolon': ';',
+            'ArrowLeft': '←',
+            'ArrowRight': '→',
+            'ArrowUp': '↑',
+            'ArrowDown': '↓'
+        };
+        function keyLabel(code) {
+            if (!code) return '未設定';
+            if (KEY_LABELS[code]) return KEY_LABELS[code];
+            if (code.startsWith('Key')) return code.slice(3);
+            if (code.startsWith('Digit')) return code.slice(5);
+            return code;
         }
 
-        // キーコンフィグ開始
-        function startKeyConfig(player) {
-            configuringPlayer = player;
-            const btn = document.getElementById(`config-${player}-btn`);
-            btn.innerText = 'キー入力待ち...';
-            btn.classList.add('waiting');
+        function refreshKeyConfigUI() {
+            document.querySelectorAll('.key-capture-btn').forEach(btn => {
+                const p = btn.dataset.player;
+                const action = btn.dataset.action;
+                const code = keyConfig[p] && keyConfig[p][action];
+                btn.innerText = keyLabel(code);
+            });
         }
 
-        // キーボードイベントの制御
-        window.addEventListener('keydown', function(e) {
-            // 1. キーコンフィグ中の処理
-            if (configuringPlayer) {
-                e.preventDefault();
-                const targetKey = e.key.toLowerCase();
-                
-                if (configuringPlayer === 'p1') {
-                    p1Key = targetKey;
-                    document.getElementById('config-p1-btn').innerText = getKeyDisplayName(e.key);
-                    document.getElementById('config-p1-btn').classList.remove('waiting');
-                } else if (configuringPlayer === 'p2') {
-                    p2Key = targetKey;
-                    document.getElementById('config-p2-btn').innerText = getKeyDisplayName(e.key);
-                    document.getElementById('config-p2-btn').classList.remove('waiting');
-                }
-                configuringPlayer = null;
-                return;
+        function resetKeyConfig() {
+            keyConfig = JSON.parse(JSON.stringify(DEFAULT_KEY_CONFIG));
+            refreshKeyConfigUI();
+            document.getElementById('config-hint').innerText = '既定値にリセットしました。';
+        }
+
+        function toggleConfigPanel() {
+            const body = document.getElementById('config-body');
+            const btn = document.getElementById('config-toggle-btn');
+            const isOpen = body.style.display !== 'none';
+            body.style.display = isOpen ? 'none' : 'block';
+            btn.innerText = isOpen ? '設定を開く ▾' : '設定を閉じる ▴';
+        }
+
+        // キー割り当てのキャプチャ処理
+        let capturingBtn = null; // 現在キー入力待ちのボタン要素
+
+        function setupKeyCaptureButtons() {
+            document.querySelectorAll('.key-capture-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // 他にリスニング中のボタンがあれば解除
+                    if (capturingBtn && capturingBtn !== btn) {
+                        capturingBtn.classList.remove('listening');
+                        refreshKeyConfigUI();
+                    }
+                    capturingBtn = btn;
+                    btn.classList.add('listening');
+                    btn.innerText = 'キーを押してください...';
+                    document.getElementById('config-hint').innerText = 'キーボードの任意のキーを押すと割り当てられます（Escでキャンセル）。';
+                });
+            });
+        }
+
+        function handleKeyCaptureInput(e) {
+            if (!capturingBtn) return false;
+            e.preventDefault();
+            const player = capturingBtn.dataset.player;
+            const action = capturingBtn.dataset.action;
+
+            if (e.code === 'Escape') {
+                capturingBtn.classList.remove('listening');
+                capturingBtn = null;
+                refreshKeyConfigUI();
+                document.getElementById('config-hint').innerText = '割り当てをキャンセルしました。';
+                return true;
             }
 
-            // 2. クイズ中の早押し判定
-            if (timerId && !isPressed && buttonState === 'push') {
-                const pressedKey = e.key.toLowerCase();
-                if (pressedKey === p1Key.toLowerCase()) {
-                    e.preventDefault();
-                    pressButton('player1');
-                } else if (pressedKey === p2Key.toLowerCase()) {
-                    e.preventDefault();
-                    pressButton('player2');
-                }
-            } 
-            // 3. 誰かが押した後の「回答を表示」ショートカット
-            else if (isPressed && buttonState === 'show_answer') {
-                const pressedKey = e.key.toLowerCase();
-                // 押した本人のキー、もしくはもう片方のキーでも回答表示に進めるようにする
-                if (pressedKey === p1Key.toLowerCase() || pressedKey === p2Key.toLowerCase()) {
-                    e.preventDefault();
-                    showAnswer();
-                }
+            // 同じプレイヤー内で重複していないかチェック
+            const conflictAction = Object.keys(keyConfig[player]).find(
+                a => a !== action && keyConfig[player][a] === e.code
+            );
+            if (conflictAction) {
+                document.getElementById('config-hint').innerText = 'そのキーは同プレイヤーの別の操作に使用中です。別のキーを選んでください。';
+                return true;
             }
-        });
+            // 別プレイヤーとの重複もチェック（2人対戦時の誤操作防止のため警告のみ、設定自体は許可）
+            const otherPlayer = player === '1' ? '2' : '1';
+            let warn = '';
+            if (keyConfig[otherPlayer] && Object.values(keyConfig[otherPlayer]).includes(e.code)) {
+                warn = '（注意: もう一方のプレイヤーのキーと重複しています）';
+            }
+
+            keyConfig[player][action] = e.code;
+            capturingBtn.classList.remove('listening');
+            capturingBtn = null;
+            refreshKeyConfigUI();
+            document.getElementById('config-hint').innerText = `${keyLabel(e.code)} を割り当てました。${warn}`;
+            return true;
+        }
+
+        // --- 対戦人数の切り替え ---
+        function setPlayerCount(count) {
+            playerCount = count;
+            document.getElementById('mode-1p-btn').classList.toggle('active', count === 1);
+            document.getElementById('mode-2p-btn').classList.toggle('active', count === 2);
+            document.getElementById('player2-config').style.display = count === 2 ? 'block' : 'none';
+        }
 
         // アプリ初期化
         function initApp() {
             document.getElementById('start-screen').style.display = 'block';
             document.getElementById('quiz-screen').style.display = 'none';
             document.getElementById('answer-area').style.display = 'none';
-            document.getElementById('judge-section').style.display = 'none';
             document.getElementById('status-label').innerText = "";
             document.getElementById('info-msg').innerText = "";
-            
-            document.getElementById('config-p1-btn').innerText = getKeyDisplayName(p1Key);
-            document.getElementById('config-p2-btn').innerText = getKeyDisplayName(p2Key);
-            
-            const pushBtn = document.getElementById('push-btn');
+
+            refreshKeyConfigUI();
+            setupKeyCaptureButtons();
+            setPlayerCount(1);
+
+            document.addEventListener('keydown', globalKeyHandler);
+        }
+
+        function resetPlayerUI(p) {
+            const idx = p - 1;
+            const pushBtn = document.getElementById(`push-btn-${p}`);
             pushBtn.style.display = 'block';
-            pushBtn.disabled = true; // 早押し中はキーボード専用にするため無効化
+            pushBtn.disabled = false;
+            pushBtn.innerText = "押す！";
             pushBtn.className = "action-btn";
-            
-            isPressed = false;
-            winner = "";
-            buttonState = 'push';
+            document.getElementById(`judge-section-${p}`).style.display = 'none';
+            document.getElementById(`player${p}-area`).classList.remove('player-won');
+            players[idx] = { id: p, pressedChars: 0, state: 'push' };
         }
 
         // クイズ開始
         async function startQuiz() {
-            isPressed = false;
-            winner = "";
-            pressedCountByPlayer = 0;
-            npcPressCharIndex = -1;
+            // 状態をリセット
             charIndex = 0;
             displayedQuestion = "";
-            buttonState = 'push';
+            npcPressCharIndex = -1;
+            roundOver = false;
             if (timerId) {
                 clearInterval(timerId);
                 timerId = null;
             }
 
-            currentMode = 'battle';
             document.getElementById('start-screen').style.display = 'none';
             document.getElementById('quiz-screen').style.display = 'block';
-            
             document.getElementById('answer-area').style.display = 'none';
-            document.getElementById('judge-section').style.display = 'none';
             document.getElementById('status-label').innerText = "";
             document.getElementById('info-msg').innerText = "";
 
-            const pushBtn = document.getElementById('push-btn');
-            pushBtn.style.display = 'block';
-            pushBtn.disabled = true; // 早押しはキーボード操作のみ
-            pushBtn.innerText = `キーを叩け！ (P1: ${getKeyDisplayName(p1Key)} / P2: ${getKeyDisplayName(p2Key)})`;
-            pushBtn.className = "action-btn";
+            resetPlayerUI(1);
+            document.getElementById('player1-area').style.display = 'block';
+            document.getElementById('player1-area-title').innerText = playerCount === 2 ? 'プレイヤー1' : 'プレイヤー';
+
+            if (playerCount === 2) {
+                resetPlayerUI(2);
+                document.getElementById('player2-area').style.display = 'block';
+            } else {
+                document.getElementById('player2-area').style.display = 'none';
+            }
 
             document.getElementById('question-box').innerText = "読み込み中...";
 
-            // 1. Supabaseからランダムに1問取得
+            // 1. Supabaseからランダムに1問取得（失敗時はローカルの代替問題を使う）
             let quizzes = [];
             let fetchError = null;
+            let fetchException = null;
             try {
                 const result = await supabaseClient.from('quizzes').select('*');
                 quizzes = result.data || [];
                 fetchError = result.error;
             } catch (e) {
-                fetchError = e;
+                fetchException = e;
             }
 
-            if (fetchError || quizzes.length === 0) {
+            if (fetchError || fetchException || quizzes.length === 0) {
                 currentQuiz = FALLBACK_QUIZZES[Math.floor(Math.random() * FALLBACK_QUIZZES.length)];
-                document.getElementById('info-msg').innerText = 'Supabaseの取得に失敗したため、サンプル問題を使用します。';
+                let reason = '';
+                if (fetchException) {
+                    // ネイティブのError/TypeErrorはJSON.stringifyで{}になるため、まずmessage/nameを見る
+                    reason = `例外: ${fetchException.name || ''} ${fetchException.message || String(fetchException)}`.trim();
+                } else if (fetchError) {
+                    reason = fetchError.message || fetchError.hint || fetchError.code || JSON.stringify(fetchError);
+                } else {
+                    reason = 'quizzesテーブルが空です';
+                }
+                document.getElementById('info-msg').innerText = `Supabaseの取得に失敗したため、サンプル問題を使用します。（理由: ${reason}）`;
+                console.warn('Supabase quizzes fetch issue. error:', fetchError, 'exception:', fetchException, 'rows:', quizzes.length);
             } else {
                 currentQuiz = quizzes[Math.floor(Math.random() * quizzes.length)];
             }
             fullQuestion = currentQuiz.question;
             
             // 2. NPCの押しタイミングを計算
-            document.getElementById('info-msg').innerText = 'NPC（CPU）も参戦中...';
+            document.getElementById('info-msg').innerText = 'NPC対戦中...';
             try {
                 const { data: logs } = await supabaseClient
                     .from('play_logs')
@@ -363,6 +559,8 @@
 
             // 3. タイピングスタート
             document.getElementById('question-box').innerText = "";
+            document.getElementById('info-msg').innerText = 'NPC対戦中...';
+            
             timerId = setInterval(typewriterEffect, TYPING_SPEED);
         }
 
@@ -374,7 +572,7 @@
                 document.getElementById('question-box').innerText = displayedQuestion;
 
                 // NPCの押しタイミングに達した場合
-                if (charIndex >= npcPressCharIndex && !isPressed) {
+                if (charIndex >= npcPressCharIndex && !roundOver) {
                     clearInterval(timerId);
                     timerId = null;
                     npcPress();
@@ -383,7 +581,7 @@
                 // 問題を最後まで読み終えた場合
                 clearInterval(timerId);
                 timerId = null;
-                if (!isPressed) {
+                if (!roundOver) {
                     // 最後まで誰も押さなかった場合、NPCが文末で押したとみなす
                     npcPressCharIndex = fullQuestion.length;
                     npcPress();
@@ -391,89 +589,106 @@
             }
         }
 
-        // マウスで画面上のアクションボタンがクリックされた時の処理振り分け
-        function handlePushBtnClick() {
-            if (buttonState === 'show_answer') {
-                showAnswer();
+        // メインアクションボタンがクリックされた時の振り分け（p = 1 or 2）
+        function handlePushBtnClick(p) {
+            const state = players[p - 1].state;
+            if (state === 'push') {
+                pressButton(p);
+            } else if (state === 'show_answer') {
+                showAnswer(p);
             }
         }
 
-        // プレイヤーがキーボードを叩いたとき
-        function pressButton(player) {
-            if (isPressed) return;
-            isPressed = true;
+        // プレイヤーが「押す！」ボタンをクリック／キー入力したとき
+        function pressButton(p) {
+            if (roundOver) return;
+            if (players[p - 1].state !== 'push') return;
+
+            roundOver = true;
             clearInterval(timerId);
             timerId = null;
-            
-            pressedCountByPlayer = charIndex; // 押した時点の文字数を記録
-            winner = player;
 
-            const playerName = player === 'player1' ? 'プレイヤー1' : 'プレイヤー2';
-            document.getElementById('status-label').innerText = `【${playerName}】が押しました！回答してください。`;
-            
-            // ボタンをマウスでもクリック可能な「回答を表示」モードに変更
-            const pushBtn = document.getElementById('push-btn');
-            pushBtn.disabled = false;
-            pushBtn.innerText = "回答を表示 (または早押しキー)";
+            players[p - 1].pressedChars = charIndex;
+            players[p - 1].state = 'show_answer';
+
+            // 他のプレイヤー（押せていない方）のボタンは無効化
+            for (let other = 1; other <= playerCount; other++) {
+                if (other === p) continue;
+                if (players[other - 1].state === 'push') {
+                    players[other - 1].state = 'done';
+                    const otherBtn = document.getElementById(`push-btn-${other}`);
+                    otherBtn.disabled = true;
+                    otherBtn.innerText = '出遅れ...';
+                }
+            }
+
+            const label = playerCount === 2 ? `プレイヤー${p}` : 'あなた';
+            document.getElementById('status-label').innerText = `${label}が押しました！回答してください。`;
+            document.getElementById(`player${p}-area`).classList.add('player-won');
+
+            const pushBtn = document.getElementById(`push-btn-${p}`);
+            pushBtn.innerText = "回答を表示";
             pushBtn.classList.add('show-answer-mode');
-            buttonState = 'show_answer';
         }
 
-        // 「回答を表示」を実行したとき
-        function showAnswer() {
-            buttonState = 'none';
-            
-            // 回答表示ボタンを非表示にする
-            document.getElementById('push-btn').style.display = 'none';
+        // 「回答を表示」ボタンをクリック／キー入力したとき
+        function showAnswer(p) {
+            if (players[p - 1].state !== 'show_answer') return;
+            players[p - 1].state = 'judging';
+
+            // 回答表示ボタンは役目を終えたので非表示にする
+            document.getElementById(`push-btn-${p}`).style.display = 'none';
 
             // 答えを表示
             document.getElementById('answer-box').innerText = currentQuiz.answer;
             document.getElementById('answer-area').style.display = 'block';
 
-            // 誰の判定かをわかりやすくラベル更新
-            const playerName = winner === 'player1' ? 'プレイヤー1' : 'プレイヤー2';
-            document.getElementById('status-label').innerText = `【${playerName}】の自己申告判定`;
-
             // 〇×判定を表示
-            document.getElementById('judge-section').style.display = 'block';
+            document.getElementById(`judge-section-${p}`).style.display = 'block';
         }
 
         // NPCが先に押した場合の処理
         function npcPress() {
-            if (isPressed) return; 
-            isPressed = true;
-            winner = "npc";
-            
-            document.getElementById('push-btn').style.display = 'none';
-            buttonState = 'none';
+            if (roundOver) return; // 二重発火防止
+            roundOver = true;
 
-            document.getElementById('status-label').innerText = '🤖 NPCが先に押しました！';
+            // 全プレイヤーのアクションボタンを非表示にし、出遅れ状態にする
+            for (let p = 1; p <= playerCount; p++) {
+                if (players[p - 1].state === 'push') {
+                    players[p - 1].state = 'done';
+                }
+                document.getElementById(`push-btn-${p}`).style.display = 'none';
+                document.getElementById(`judge-section-${p}`).style.display = 'none';
+            }
+
+            document.getElementById('status-label').innerText = 'NPCが先に押しました。';
             
-            // NPCの場合は即時答えを表示して次へ
+            // NPCの場合は即時答えを表示（自己申告は不要）
             document.getElementById('answer-box').innerText = currentQuiz.answer;
             document.getElementById('answer-area').style.display = 'block';
-            document.getElementById('judge-section').style.display = 'none';
 
-            setTimeout(() => nextQuestion(), 2500);
+            setTimeout(() => nextQuestion(), 2000);
         }
 
-        // 〇×ボタンが押されたとき
-        async function submitResult(isCorrect) {
-            document.getElementById('judge-section').style.display = 'none';
+        // 〇×ボタンが押されたとき（p = 1 or 2）
+        async function submitResult(p, isCorrect) {
+            if (players[p - 1].state !== 'judging') return;
+            players[p - 1].state = 'done';
+            document.getElementById(`judge-section-${p}`).style.display = 'none';
             
             // フォールバック問題の場合はDBへの保存をスキップ
             if (currentQuiz.id && !String(currentQuiz.id).startsWith('fallback')) {
                 try {
                     const { error } = await supabaseClient
                         .from('play_logs')
-                        .insert([{ quiz_id: currentQuiz.id, pressed_chars: pressedCountByPlayer, is_correct: isCorrect }]);
+                        .insert([{ quiz_id: currentQuiz.id, pressed_chars: players[p - 1].pressedChars, is_correct: isCorrect }]);
 
                     if (error) {
                         const reason = error.message || '不明なエラー';
                         const detail = error.code ? ` (code: ${error.code})` : '';
-                        document.getElementById('info-msg').innerText = `ログ保存失敗: ${reason}${detail}`;
+                        document.getElementById('info-msg').innerText = `。${reason}${detail}`;
                     } else {
-                        document.getElementById('info-msg').innerText = 'ログを保存しました。';
+                        document.getElementById('info-msg').innerText = '.';
                     }
                 } catch (e) {
                     document.getElementById('info-msg').innerText = `保存エラー: ${e.message}`;
@@ -485,6 +700,52 @@
 
         async function nextQuestion() {
             await startQuiz();
+        }
+
+        // --- キーボード操作 ---
+        function globalKeyHandler(e) {
+            // 設定パネルでキーをキャプチャ中ならそちらを優先
+            if (capturingBtn) {
+                handleKeyCaptureInput(e);
+                return;
+            }
+
+            // テキスト入力中などはキーボード操作を無視（このアプリには入力欄はないが将来のために保護）
+            const tag = document.activeElement && document.activeElement.tagName;
+            if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+
+            // スタート画面でのEnter/Spaceでのゲーム開始
+            const startScreenVisible = document.getElementById('start-screen').style.display !== 'none';
+            if (startScreenVisible) {
+                if (e.code === 'Enter' || e.code === 'Space') {
+                    e.preventDefault();
+                    startQuiz();
+                }
+                return;
+            }
+
+            // クイズ画面でのプレイヤー別キー判定
+            for (let p = 1; p <= playerCount; p++) {
+                const cfg = keyConfig[p];
+                if (!cfg) continue;
+                const state = players[p - 1].state;
+
+                if (e.code === cfg.push && (state === 'push' || state === 'show_answer')) {
+                    e.preventDefault();
+                    handlePushBtnClick(p);
+                    return;
+                }
+                if (e.code === cfg.circle && state === 'judging') {
+                    e.preventDefault();
+                    submitResult(p, true);
+                    return;
+                }
+                if (e.code === cfg.cross && state === 'judging') {
+                    e.preventDefault();
+                    submitResult(p, false);
+                    return;
+                }
+            }
         }
 
         // 初期起動
