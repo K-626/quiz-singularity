@@ -444,4 +444,51 @@
             isPressed = true;
             winner = "npc";
             
-            document.getElementById('push-btn').style.display = '
+            document.getElementById('push-btn').style.display = 'none';
+            buttonState = 'none';
+
+            document.getElementById('status-label').innerText = '🤖 NPCが先に押しました！';
+            
+            // NPCの場合は即時答えを表示して次へ
+            document.getElementById('answer-box').innerText = currentQuiz.answer;
+            document.getElementById('answer-area').style.display = 'block';
+            document.getElementById('judge-section').style.display = 'none';
+
+            setTimeout(() => nextQuestion(), 2500);
+        }
+
+        // 〇×ボタンが押されたとき
+        async function submitResult(isCorrect) {
+            document.getElementById('judge-section').style.display = 'none';
+            
+            // フォールバック問題の場合はDBへの保存をスキップ
+            if (currentQuiz.id && !String(currentQuiz.id).startsWith('fallback')) {
+                try {
+                    const { error } = await supabaseClient
+                        .from('play_logs')
+                        .insert([{ quiz_id: currentQuiz.id, pressed_chars: pressedCountByPlayer, is_correct: isCorrect }]);
+
+                    if (error) {
+                        const reason = error.message || '不明なエラー';
+                        const detail = error.code ? ` (code: ${error.code})` : '';
+                        document.getElementById('info-msg').innerText = `ログ保存失敗: ${reason}${detail}`;
+                    } else {
+                        document.getElementById('info-msg').innerText = 'ログを保存しました。';
+                    }
+                } catch (e) {
+                    document.getElementById('info-msg').innerText = `保存エラー: ${e.message}`;
+                }
+            }
+
+            setTimeout(() => nextQuestion(), 1000);
+        }
+
+        async function nextQuestion() {
+            await startQuiz();
+        }
+
+        // 初期起動
+        window.onload = initApp;
+    </script>
+</body>
+</html>
